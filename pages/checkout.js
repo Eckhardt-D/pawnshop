@@ -126,15 +126,13 @@ function Checkout(props) {
       fulfillment: {
         shipping_method: shippingOption,
       },
+      // @see https://commercejs.com/docs/guides/manual-payment-integration/#implementing-a-custom-gateway-with-the-manual-payment-method
+      // You need to create a manual payment gateway.
       payment: {
-        gateway: 'test_gateway',
-        card: {
-          number: cardNum,
-          expiry_month: expMonth,
-          expiry_year: expYear,
-          cvc: cvv,
-          postal_zip_code: billingPostalZipcode,
-        },
+        gateway: "manual",
+        manual: {
+          id: "<id_from_dashboard>",
+        }
       },
     };
     const commerce = getCommerce(props.commercePublicKey);
@@ -143,6 +141,20 @@ function Checkout(props) {
         checkoutToken.id,
         orderData
       );
+
+       // Here you would redirect to a page with query params
+      // total, orderId. This page will have the Paytoday button:
+      // e.g. https://kaizen.com.na/payment?ref=orderId&amt=100000
+
+
+      // On successful payment at that page set PayToday redirect URL as
+      // an API / server url (you can use your api folder). There you will confirm the
+      // Paytoday payment by checking the 'status' param and use the
+      // Commerce.js Private API key to update the order (found in ref=orderId)
+      // when Paytoday redirects to your api. When you've done this, send a redirect
+      // response back to your confirmation page with a success / failed flag to inform
+      // the user.
+
       dispatch({ type: ORDER_SET, payload: order });
       localStorage.setItem('order_receipt', JSON.stringify(order));
       await refreshCart();

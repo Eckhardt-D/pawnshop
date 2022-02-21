@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import Link from 'next/link';
+import React, { useEffect, useState } from "react";
+import Link from "next/link";
 import {
   Box,
   Button,
@@ -24,18 +24,18 @@ import {
   TableRow,
   TextField,
   Typography,
-} from '@material-ui/core';
-import dynamic from 'next/dynamic';
-import { Alert } from '@material-ui/lab';
-import Layout from '../components/Layout';
-import getCommerce from '../utils/commerce';
-import { useStyles } from '../utils/styles';
-import { useContext } from 'react';
-import { Store } from '../components/Store';
-import { CART_RETRIEVE_SUCCESS, ORDER_SET } from '../utils/constants';
-import Router from 'next/router';
+} from "@material-ui/core";
+import dynamic from "next/dynamic";
+import { Alert } from "@material-ui/lab";
+import Layout from "../components/Layout";
+import getCommerce from "../utils/commerce";
+import { useStyles } from "../utils/styles";
+import { useContext } from "react";
+import { Store } from "../components/Store";
+import { CART_RETRIEVE_SUCCESS, ORDER_SET } from "../utils/constants";
+import Router from "next/router";
 
-const dev = process.env.NODE_ENV === 'development';
+const dev = process.env.NODE_ENV === "development";
 function Checkout(props) {
   const classes = useStyles();
   const { state, dispatch } = useContext(Store);
@@ -51,41 +51,41 @@ function Checkout(props) {
     if (cart.data.line_items.length) {
       const commerce = getCommerce(props.commercePublicKey);
       const token = await commerce.checkout.generateToken(cart.data.id, {
-        type: 'cart',
+        type: "cart",
       });
       setCheckoutToken(token);
       fetchShippingCountries(token.id);
     } else {
-      Router.push('/cart');
+      Router.push("/cart");
     }
   };
 
   // Customer details
-  const [firstName, setFirstName] = useState(dev ? 'Jane' : '');
-  const [lastName, setLastName] = useState(dev ? 'Doe' : '');
-  const [email, setEmail] = useState(dev ? 'janedoe@email.com' : '');
+  const [firstName, setFirstName] = useState(dev ? "Jane" : "");
+  const [lastName, setLastName] = useState(dev ? "Doe" : "");
+  const [email, setEmail] = useState(dev ? "janedoe@email.com" : "");
 
   // Shipping details
-  const [shippingName, setShippingName] = useState(dev ? 'Jane Doe' : '');
+  const [shippingName, setShippingName] = useState(dev ? "Jane Doe" : "");
   const [shippingStreet, setShippingStreet] = useState(
-    dev ? '123 Fake St' : ''
+    dev ? "123 Fake St" : ""
   );
   const [shippingPostalZipCode, setShippingPostalZipCode] = useState(
-    dev ? '90089' : ''
+    dev ? "90089" : ""
   );
-  const [shippingCity, setShippingCity] = useState(dev ? 'Los Angeles' : '');
+  const [shippingCity, setShippingCity] = useState(dev ? "Los Angeles" : "");
   const [shippingStateProvince, setShippingStateProvince] = useState(
-    dev ? 'AR' : ''
+    dev ? "AR" : ""
   );
-  const [shippingCountry, setShippingCountry] = useState(dev ? 'GB' : '');
+  const [shippingCountry, setShippingCountry] = useState(dev ? "GB" : "");
   const [shippingOption, setShippingOption] = useState({});
   // Payment details
-  const [cardNum, setCardNum] = useState(dev ? '4242 4242 4242 4242' : '');
-  const [expMonth, setExpMonth] = useState(dev ? '11' : '');
-  const [expYear, setExpYear] = useState(dev ? '2023' : '');
-  const [cvv, setCvv] = useState(dev ? '123' : '');
+  const [cardNum, setCardNum] = useState(dev ? "4242 4242 4242 4242" : "");
+  const [expMonth, setExpMonth] = useState(dev ? "11" : "");
+  const [expYear, setExpYear] = useState(dev ? "2023" : "");
+  const [cvv, setCvv] = useState(dev ? "123" : "");
   const [billingPostalZipcode, setBillingPostalZipcode] = useState(
-    dev ? '90089' : ''
+    dev ? "90089" : ""
   );
   // Shipping and fulfillment data
   const [shippingCountries, setShippingCountries] = useState({});
@@ -95,9 +95,9 @@ function Checkout(props) {
   // Stepper
   const [activeStep, setActiveStep] = React.useState(0);
   const steps = [
-    'Customer information',
-    'Shipping details',
-    'Payment information',
+    "Customer information",
+    "Shipping details",
+    "Payment information",
   ];
 
   const handleNext = () => {
@@ -126,14 +126,12 @@ function Checkout(props) {
       fulfillment: {
         shipping_method: shippingOption,
       },
+      // @see https://commercejs.com/docs/guides/manual-payment-integration/#implementing-a-custom-gateway-with-the-manual-payment-method
+      // You need to create a manual payment gateway.
       payment: {
-        gateway: 'test_gateway',
-        card: {
-          number: cardNum,
-          expiry_month: expMonth,
-          expiry_year: expYear,
-          cvc: cvv,
-          postal_zip_code: billingPostalZipcode,
+        gateway: "manual",
+        manual: {
+          id: "<id_from_dashboard>",
         },
       },
     };
@@ -143,10 +141,23 @@ function Checkout(props) {
         checkoutToken.id,
         orderData
       );
+
+      // Here you would redirect to a page with query params
+      // total, orderId. This page will have the Paytoday button:
+      // e.g. https://kaizen.com.na/payment?ref=orderId&amt=100000
+
+      // On successful payment at that page set PayToday redirect URL as
+      // an API / server url (you can use your api folder). There you will confirm the
+      // Paytoday payment by checking the 'status' param and use the
+      // Commerce.js Private API key to update the order (found in ref=orderId)
+      // when Paytoday redirects to your api. When you've done this, send a redirect
+      // response back to your confirmation page with a success / failed flag to inform
+      // the user.
+
       dispatch({ type: ORDER_SET, payload: order });
-      localStorage.setItem('order_receipt', JSON.stringify(order));
+      localStorage.setItem("order_receipt", JSON.stringify(order));
       await refreshCart();
-      Router.push('/confirmation');
+      Router.push("/confirmation");
     } catch (err) {
       const errList = [err.data.error.message];
       const errs = err.data.error.errors;
@@ -428,7 +439,7 @@ function Checkout(props) {
           </>
         );
       default:
-        return 'Unknown step';
+        return "Unknown step";
     }
   };
 
@@ -497,8 +508,8 @@ function Checkout(props) {
                           className={classes.button}
                         >
                           {activeStep === steps.length - 1
-                            ? 'Confirm Order'
-                            : 'Next'}
+                            ? "Confirm Order"
+                            : "Next"}
                         </Button>
                       </Box>
                     </Box>
